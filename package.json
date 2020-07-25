@@ -1,0 +1,13 @@
+{
+  "name": "event-chain",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "yarn workspace event-chain build"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "author": "瓦姆乌·湫曗 <autumnsilverleaves@gmail.com>",
+  "license": "MIT"
+}

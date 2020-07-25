@@ -1,0 +1,14 @@
+{
+  "name": "event-chain",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "ts-node": "^8.10.2",
+    "ts-node-dev": "^1.0.0-pre.54",
+    "typescript": "^3.9.7"
+  }
+}

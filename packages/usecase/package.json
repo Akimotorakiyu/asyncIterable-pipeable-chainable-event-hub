@@ -1,0 +1,9 @@
+{
+  "name": "usecase",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "event-chain": "^1.0.0"
+  }
+}
