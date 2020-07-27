@@ -12,7 +12,7 @@ export type CallBackSet = Set<CallBack<unknown[]>>;
 export class EventLite {
   constructor() {}
   doMap = new Map<unknown, CallBackSet>();
-  onceDoMap = new Map<unknown, CallBackSet>();
+  doOnceMap = new Map<unknown, CallBackSet>();
 
   event<E>(event: E) {
     return <Args extends unknown[]>() => {
@@ -33,7 +33,7 @@ export class EventLite {
   }
 
   once<Args extends unknown[], E>(event: E, fn: CallBack<Args>) {
-    const map = this.onceDoMap;
+    const map = this.doOnceMap;
     let callBackSet: CallBackSet;
 
     if (!(callBackSet = map.get(event))) {
@@ -87,12 +87,12 @@ export class EventLite {
       });
     }
 
-    if ((callBackSet = this.onceDoMap.get(event))) {
+    if ((callBackSet = this.doOnceMap.get(event))) {
       callBackSet.forEach((fn) => {
         fn(...args);
       });
 
-      this.onceDoMap.delete(event);
+      this.doOnceMap.delete(event);
     }
 
     return this.typed<Args, E>(event);
@@ -104,17 +104,17 @@ export class EventLite {
   ) {
     if (event && fn) {
       this.doMap.get(event)?.delete(fn);
-      this.onceDoMap.get(event)?.delete(fn);
+      this.doOnceMap.get(event)?.delete(fn);
     } else if (fn) {
       this.doMap.forEach((set) => {
         set.delete(fn);
       });
-      this.onceDoMap.forEach((set) => {
+      this.doOnceMap.forEach((set) => {
         set.delete(fn);
       });
     } else if (event) {
       this.doMap.delete(event);
-      this.onceDoMap.delete(event);
+      this.doOnceMap.delete(event);
     }
 
     return this;
