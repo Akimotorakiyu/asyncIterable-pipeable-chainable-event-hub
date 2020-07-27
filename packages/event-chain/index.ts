@@ -14,6 +14,12 @@ export class EventLite {
   doMap = new Map<unknown, CallBackSet>();
   onceDoMap = new Map<unknown, CallBackSet>();
 
+  event<E>(event: E) {
+    return <Args extends unknown[]>() => {
+      return this.typed<Args, E>(event);
+    };
+  }
+
   on<Args extends unknown[], E>(event: E, fn: CallBack<Args>) {
     const map = this.doMap;
     let callBackSet: CallBackSet;
