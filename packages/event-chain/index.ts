@@ -79,21 +79,15 @@ export class EventLite {
   }
 
   emit<Args extends unknown[], E>(event: E, ...args: Args) {
-    let callBackSet: CallBackSet;
+    this.doMap.get(event)?.forEach((fn) => {
+      fn(...args);
+    });
 
-    if ((callBackSet = this.doMap.get(event))) {
-      callBackSet.forEach((fn) => {
-        fn(...args);
-      });
-    }
+    this.doOnceMap.get(event)?.forEach((fn) => {
+      fn(...args);
+    });
 
-    if ((callBackSet = this.doOnceMap.get(event))) {
-      callBackSet.forEach((fn) => {
-        fn(...args);
-      });
-
-      this.doOnceMap.delete(event);
-    }
+    this.doOnceMap.delete(event);
 
     return this.typed<Args, E>(event);
   }
