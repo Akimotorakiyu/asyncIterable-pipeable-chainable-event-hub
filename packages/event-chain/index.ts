@@ -64,12 +64,12 @@ export class EventLite {
         this.once(event, fn);
         return make;
       },
-      typedRemove: (fn: CallBack<Args>) => {
+      typedRemove: (fn?: CallBack<Args>) => {
         this.remove(event, fn);
         return make;
       },
       eventLite: this,
-      typedemit: (...args: Args) => {
+      typedEmit: (...args: Args) => {
         this.emit(event, ...args);
         return make;
       },
@@ -78,7 +78,7 @@ export class EventLite {
 
         make.typedOn((...args) => {
           const value = fn(...args);
-          pipeMake.typedemit(value);
+          pipeMake.typedEmit(value);
         });
 
         return pipeMake;
