@@ -47,6 +47,15 @@ export class EventLite {
   typed<Args extends unknown[], E = unknown>(event: E) {
     const make = {
       event,
+      async *iterable() {
+        while (true) {
+          yield new Promise<Args>((rsolve) => {
+            make.typedOnce((...args) => {
+              rsolve(args);
+            });
+          });
+        }
+      },
       typedOn: (fn: CallBack<Args>) => {
         this.on(event, fn);
         return make;
