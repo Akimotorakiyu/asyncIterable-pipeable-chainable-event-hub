@@ -1,19 +1,47 @@
 import { EventLite } from "event-chain";
 
-const bus = new EventLite();
+const eventLite = new EventLite();
 
-const test = bus.event("test")<[number, string]>();
+const someEvent = eventLite.event("eventName")<[number, string]>();
+
+let i = 0;
+
+setInterval(() => {
+  // with type check
+  someEvent.typedEmit(++i, i + "");
+}, 1000);
+
+// or
+someEvent.typedOn(console.info).typedOnce(console.log).typedRemove();
+
+// or
+eventLite
+  .on("eventName", (n: number, s: string) => {
+    console.log(n, s);
+  })
+  .typedOn(console.info)
+  .typedOnce(console.log)
+  .typedRemove();
+
+// or
+eventLite
+  .event("eventName")<[number, string]>()
+  .typedOn(console.info)
+  .typedOnce(console.log)
+  .typedRemove();
 
 async function name() {
-  for await (const iterator of test.iterable()) {
+  for await (const iterator of someEvent.iterable()) {
     console.log(iterator);
-    iterator;
   }
 }
 
-let i = 0;
-setInterval(() => {
-  test.typedemit(++i, i + "");
-}, 1000);
-
 name();
+
+const follow = someEvent
+  .typedPipe("follow", (n, s) => {
+    return n;
+  })
+  .typedOn(console.info)
+  .typedOnce(console.log)
+  .typedRemove();
