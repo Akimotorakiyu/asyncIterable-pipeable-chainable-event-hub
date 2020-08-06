@@ -2,10 +2,7 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "UMD",
-    "strict": true,
-    "strictNullChecks": true,
     "noUnusedLocals": true,
-    "alwaysStrict": true,
     "declaration": true,
     "sourceMap": true
   }
