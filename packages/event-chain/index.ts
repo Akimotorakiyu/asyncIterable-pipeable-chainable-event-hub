@@ -64,7 +64,7 @@ export class EventLite {
         this.once(event, fn);
         return make;
       },
-      typedRemove: (fn?: CallBack<Args>) => {
+      typedRemove: (fn: CallBack<Args> | undefined) => {
         this.remove(event, fn);
         return make;
       },

@@ -12,7 +12,7 @@ setInterval(() => {
 }, 1000);
 
 // or
-someEvent.typedOn(console.info).typedOnce(console.log).typedRemove();
+someEvent.typedOn(console.info).typedOnce(console.log).typedRemove(undefined);
 
 // or
 eventLite
@@ -21,14 +21,14 @@ eventLite
   })
   .typedOn(console.info)
   .typedOnce(console.log)
-  .typedRemove();
+  .typedRemove(undefined);
 
 // or
 eventLite
   .event("eventName")<[number, string]>()
   .typedOn(console.info)
   .typedOnce(console.log)
-  .typedRemove();
+  .typedRemove(undefined);
 
 async function name() {
   for await (const iterator of someEvent.iterable()) {
@@ -44,4 +44,4 @@ const follow = someEvent
   })
   .typedOn(console.info)
   .typedOnce(console.log)
-  .typedRemove();
+  .typedRemove(undefined);
