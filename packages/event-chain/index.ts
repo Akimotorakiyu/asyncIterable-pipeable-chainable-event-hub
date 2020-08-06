@@ -17,9 +17,9 @@ export class EventLite {
   /**
    *
    *
-   * @template E
-   * @param {E} event
-   * @returns
+   * @template E typeof event key
+   * @param {E} event event key
+   * @returns typed handler
    * @memberof EventLite
    */
   event<E>(event: E) {
@@ -31,10 +31,10 @@ export class EventLite {
   /**
    *
    *
-   * @template Args
-   * @template E
-   * @param {E} event
-   * @param {CallBack<Args>} fn
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {E} event event key
+   * @param {CallBack<Args>} fn callback
    * @returns
    * @memberof EventLite
    */
@@ -53,10 +53,10 @@ export class EventLite {
   /**
    *
    *
-   * @template Args
-   * @template E
-   * @param {E} event
-   * @param {CallBack<Args>} fn
+   * @template Args typeof args for callback
+   * @template E  typeof event key
+   * @param {E} event event key
+   * @param {CallBack<Args>} fn callback
    * @returns
    * @memberof EventLite
    */
@@ -75,9 +75,9 @@ export class EventLite {
   /**
    *
    *
-   * @template Args
-   * @template E
-   * @param {E} event
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {E} event event key
    * @returns
    * @memberof EventLite
    */
@@ -127,10 +127,10 @@ export class EventLite {
   /**
    *
    *
-   * @template Args
-   * @template E
-   * @param {E} event
-   * @param {...Args} args
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {E} event event key
+   * @param {...Args} args args
    * @returns
    * @memberof EventLite
    */
@@ -151,11 +151,11 @@ export class EventLite {
   /**
    *
    *
-   * @template Args
-   * @template E
-   * @param {(E | undefined)} event
-   * @param {(CallBack<Args> | undefined)} fn
-   * @returns
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {(E | undefined)} event event key
+   * @param {(CallBack<Args> | undefined)} fn callback
+   * @returns current EventLite instance
    * @memberof EventLite
    */
   remove<Args extends unknown[], E>(
