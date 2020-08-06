@@ -4,7 +4,7 @@ export type CallBack<Args extends unknown[], V = unknown> = (
 export type CallBackSet = Set<CallBack<unknown[]>>;
 
 /**
- * notice:注意手动释放内存
+ *
  *
  * @export
  * @class EventLite
@@ -14,12 +14,30 @@ export class EventLite {
   doMap = new Map<unknown, CallBackSet>();
   doOnceMap = new Map<unknown, CallBackSet>();
 
+  /**
+   *
+   *
+   * @template E
+   * @param {E} event
+   * @returns
+   * @memberof EventLite
+   */
   event<E>(event: E) {
     return <Args extends unknown[]>() => {
       return this.typed<Args, E>(event);
     };
   }
 
+  /**
+   *
+   *
+   * @template Args
+   * @template E
+   * @param {E} event
+   * @param {CallBack<Args>} fn
+   * @returns
+   * @memberof EventLite
+   */
   on<Args extends unknown[], E>(event: E, fn: CallBack<Args>) {
     const map = this.doMap;
     let callBackSet: CallBackSet;
@@ -32,6 +50,16 @@ export class EventLite {
     return this.typed<Args, E>(event);
   }
 
+  /**
+   *
+   *
+   * @template Args
+   * @template E
+   * @param {E} event
+   * @param {CallBack<Args>} fn
+   * @returns
+   * @memberof EventLite
+   */
   once<Args extends unknown[], E>(event: E, fn: CallBack<Args>) {
     const map = this.doOnceMap;
     let callBackSet: CallBackSet;
@@ -44,6 +72,15 @@ export class EventLite {
     return this.typed<Args, E>(event);
   }
 
+  /**
+   *
+   *
+   * @template Args
+   * @template E
+   * @param {E} event
+   * @returns
+   * @memberof EventLite
+   */
   typed<Args extends unknown[], E = unknown>(event: E) {
     const make = {
       event,
@@ -87,6 +124,16 @@ export class EventLite {
     return make;
   }
 
+  /**
+   *
+   *
+   * @template Args
+   * @template E
+   * @param {E} event
+   * @param {...Args} args
+   * @returns
+   * @memberof EventLite
+   */
   emit<Args extends unknown[], E>(event: E, ...args: Args) {
     this.doMap.get(event)?.forEach((fn) => {
       fn(...args);
@@ -101,6 +148,16 @@ export class EventLite {
     return this.typed<Args, E>(event);
   }
 
+  /**
+   *
+   *
+   * @template Args
+   * @template E
+   * @param {(E | undefined)} event
+   * @param {(CallBack<Args> | undefined)} fn
+   * @returns
+   * @memberof EventLite
+   */
   remove<Args extends unknown[], E>(
     event: E | undefined,
     fn: CallBack<Args> | undefined
