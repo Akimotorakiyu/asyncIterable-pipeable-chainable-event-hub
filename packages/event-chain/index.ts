@@ -120,8 +120,8 @@ export class EventLite {
 
         return pipeMake;
       },
-      typedCreate: () => {
-        return this.create<Args, E>(event);
+      typedConnect: () => {
+        return this.connect<Args, E>(event);
       },
     };
     return make;
@@ -183,15 +183,16 @@ export class EventLite {
     return this;
   }
 
-  create<Args extends unknown[], E = unknown>(event: E) {
-    const eventLite = new EventLite();
-
-    const xChian = eventLite.typed<Args, E>(event);
+  connect<Args extends unknown[], E = unknown>(
+    event: E,
+    eventLite = new EventLite()
+  ) {
+    const connectionPoint = eventLite.typed<Args, E>(event);
 
     this.typed<Args, E>(event).typedOn((...args) => {
-      xChian.typedEmit(...args);
+      connectionPoint.typedEmit(...args);
     });
 
-    return xChian;
+    return connectionPoint;
   }
 }
