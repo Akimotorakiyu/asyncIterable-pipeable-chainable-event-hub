@@ -1,5 +1,7 @@
 # asyncIterable-pipeable-chainable-event-hub
 
+![CI/test](https://github.com/Akimotorakiyu/asyncIterable-pipeable-chainable-event-hub/workflows/CI/test/badge.svg)
+
 `chainable`, `asyncIterable`, `pipeable` with `type infer`
 
 it will be useful when work with `EventEmitter`, `rxjs`, `Socket (Socket extends EventEmitter)` or other `event driven` bussiness.
