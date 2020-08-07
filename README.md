@@ -6,7 +6,9 @@
 
 it will be useful when work with `EventEmitter`, `rxjs`, `Socket (Socket extends EventEmitter)` or other `event driven` bussiness.
 
-## hwo to use
+## Example
+
+### Create an instance
 
 create an `EventLite` instance
 
@@ -22,6 +24,8 @@ optional but useful `event hub`
 const someEvent = eventLite.event("eventName")<[number, string]>();
 ```
 
+### Emit
+
 `emit` on anywhere
 
 ```ts
@@ -29,10 +33,14 @@ let i = 0;
 setInterval(() => {
   // with type check
   someEvent.typedEmit(++i, i + "");
+  // or without type check
+  eventLite.emit("eventName", ++i, i + "");
 }, 1000);
 ```
 
-deal event, `chainable` and `with type infer`
+### Add listener
+
+`chainable` and `with type infer`
 
 ```ts
 // or
@@ -45,15 +53,17 @@ eventLite
   })
   .typedOn(console.info)
   .typedOnce(console.log)
-  .typedRemove();
+  .typedRemove(undefined);
 
 // or
 eventLite
   .event("eventName")<[number, string]>()
   .typedOn(console.info)
   .typedOnce(console.log)
-  .typedRemove();
+  .typedRemove(undefined);
 ```
+
+### Async Iterable
 
 `asyncIterable` and `with type infer`
 
@@ -62,6 +72,8 @@ for await (const iterator of someEvent.iterable()) {
   console.log(iterator);
 }
 ```
+
+### Pipeable
 
 `pipeable` and `with type infer`
 
@@ -72,5 +84,20 @@ const follow = someEvent
   })
   .typedOn(console.info)
   .typedOnce(console.log)
-  .typedRemove();
+  .typedRemove(undefined);
+```
+
+## Note: about remove
+
+`remove` function have two arg, first one is `event key`,secondone is `event listener` callback, `typedRemove` just need the second arg of `remove`.
+
+```ts
+// just remove eventListener from listeners list of the event for `event key`
+eventLite.remove("event key", eventListener);
+
+// remove all eventListener from listeners list of the event for `event key`
+eventLite.remove("event key", undefined);
+
+// remove eventListener from listeners list of all event
+eventLite.remove(undefined, eventListener);
 ```

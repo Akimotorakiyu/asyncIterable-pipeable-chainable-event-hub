@@ -9,6 +9,8 @@ let i = 0;
 setInterval(() => {
   // with type check
   someEvent.typedEmit(++i, i + "");
+  // or without type check
+  eventLite.emit("eventName", ++i, i + "");
 }, 1000);
 
 // or
@@ -45,3 +47,14 @@ const follow = someEvent
   .typedOn(console.info)
   .typedOnce(console.log)
   .typedRemove(undefined);
+
+const eventListener = console.log;
+
+// just remove eventListener from listeners list of the event for `event key`
+eventLite.remove("event key", eventListener);
+
+// remove all eventListener from listeners list of the event for `event key`
+eventLite.remove("event key", undefined);
+
+// remove eventListener from listeners list of all event
+eventLite.remove(undefined, eventListener);
