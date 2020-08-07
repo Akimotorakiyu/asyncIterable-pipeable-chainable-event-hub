@@ -22,7 +22,7 @@ export class EventLite {
    * @returns typed handler
    * @memberof EventLite
    */
-  event<E>(event: E) {
+  event<E>(this: EventLite, event: E) {
     return <Args extends unknown[]>() => {
       return this.typed<Args, E>(event);
     };
@@ -38,7 +38,7 @@ export class EventLite {
    * @returns
    * @memberof EventLite
    */
-  on<Args extends unknown[], E>(event: E, fn: CallBack<Args>) {
+  on<Args extends unknown[], E>(this: EventLite, event: E, fn: CallBack<Args>) {
     const map = this.doMap;
     let callBackSet: CallBackSet;
 
@@ -60,7 +60,11 @@ export class EventLite {
    * @returns
    * @memberof EventLite
    */
-  once<Args extends unknown[], E>(event: E, fn: CallBack<Args>) {
+  once<Args extends unknown[], E>(
+    this: EventLite,
+    event: E,
+    fn: CallBack<Args>
+  ) {
     const map = this.doOnceMap;
     let callBackSet: CallBackSet;
 
@@ -81,7 +85,7 @@ export class EventLite {
    * @returns
    * @memberof EventLite
    */
-  typed<Args extends unknown[], E = unknown>(event: E) {
+  typed<Args extends unknown[], E = unknown>(this: EventLite, event: E) {
     const make = {
       event,
       async *iterable() {
@@ -137,7 +141,7 @@ export class EventLite {
    * @returns
    * @memberof EventLite
    */
-  emit<Args extends unknown[], E>(event: E, ...args: Args) {
+  emit<Args extends unknown[], E>(this: EventLite, event: E, ...args: Args) {
     this.doMap.get(event)?.forEach((fn) => {
       fn(...args);
     });
@@ -162,6 +166,7 @@ export class EventLite {
    * @memberof EventLite
    */
   remove<Args extends unknown[], E>(
+    this: EventLite,
     event: E | undefined,
     fn: CallBack<Args> | undefined
   ) {
@@ -184,6 +189,7 @@ export class EventLite {
   }
 
   connect<Args extends unknown[], E = unknown>(
+    this: EventLite,
     event: E,
     eventLite = new EventLite()
   ) {
