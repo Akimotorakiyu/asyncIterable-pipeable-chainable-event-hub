@@ -78,13 +78,23 @@ for await (const iterator of someEvent.iterable()) {
 `pipeable` and `with type infer`
 
 ```ts
-const follow = someEvent
+const followEvent = someEvent
   .typedPipe("follow", (n, s) => {
     return n;
   })
   .typedOn(console.info)
   .typedOnce(console.log)
   .typedRemove(undefined);
+```
+
+`connect` and `pipe` to a another or a new EventLite instance
+
+```ts
+const followEventLite = someEvent
+  .typedConnect()
+  .typedOn(console.info)
+  .typedOnce(console.log)
+  .typedRemove(undefined).eventLite;
 ```
 
 ## Note: about remove

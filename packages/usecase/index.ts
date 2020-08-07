@@ -48,6 +48,12 @@ const follow = someEvent
   .typedOnce(console.log)
   .typedRemove(undefined);
 
+const followEventLite = someEvent
+  .typedConnect()
+  .typedOn(console.info)
+  .typedOnce(console.log)
+  .typedRemove(undefined);
+
 const eventListener = console.log;
 
 // just remove eventListener from listeners list of the event for `event key`
