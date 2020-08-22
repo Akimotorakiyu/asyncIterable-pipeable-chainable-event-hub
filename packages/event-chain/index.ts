@@ -114,8 +114,8 @@ export class EventLite {
         this.emit(event, ...args);
         return make;
       },
-      typedPipe: <E, V>(follow: E, fn: CallBack<Args, V>) => {
-        const pipeMake = this.typed<[V]>(follow);
+      typedPipe: <V, E>(fn: CallBack<Args, V>, follow?: E) => {
+        const pipeMake = this.typed<[V]>(follow ?? Symbol());
 
         make.typedOn((...args) => {
           const value = fn(...args);
