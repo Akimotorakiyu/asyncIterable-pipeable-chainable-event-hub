@@ -88,13 +88,52 @@ export class EventLite {
   typed<Args extends unknown[], E = unknown>(this: EventLite, event: E) {
     const make = {
       event,
-      async *iterable() {
-        while (true) {
-          yield new Promise<Args>((rsolve) => {
-            make.typedOnce((...args) => {
-              rsolve(args);
-            });
+      async *iterable<R>() {
+        let resolverPool: [
+          (args: { cancel: (reason: R) => void; data: Args }) => void,
+          (reason: R) => void
+        ][] = [];
+        const pool: Args[] = [];
+
+        function recive(...args: Args) {
+          pool.push(args);
+          deal();
+        }
+
+        make.typedOn(recive);
+
+        let status = true;
+        const cancel = (reason: R) => {
+          status = false;
+          make.typedRemove(recive);
+          deal();
+
+          resolverPool.forEach(([resolve, reject]) => {
+            reject(reason);
           });
+
+          resolverPool.length = 0;
+          pool.length = 0;
+        };
+
+        const deal = () => {
+          while (resolverPool.length && pool.length) {
+            const [resolve] = resolverPool.shift();
+            const args = pool.shift();
+            resolve({
+              data: args,
+              cancel,
+            });
+          }
+        };
+
+        while (status) {
+          yield new Promise<{ cancel: (reason: R) => void; data: Args }>(
+            (rsolve, reject) => {
+              resolverPool.push([rsolve, reject]);
+              deal();
+            }
+          );
         }
       },
       typedOn: (fn: CallBack<Args>) => {
