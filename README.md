@@ -68,8 +68,8 @@ eventLite
 `asyncIterable` and `with type infer`
 
 ```ts
-for await (const iterator of someEvent.iterable()) {
-  console.log(iterator);
+for await (const { data, cancel } of someEvent.iterable()) {
+  console.log(data);
 }
 ```
 
@@ -79,7 +79,7 @@ for await (const iterator of someEvent.iterable()) {
 
 ```ts
 const followEvent = someEvent
-  .typedPipe("follow", (n, s) => {
+  .typedPipe((n, s) => {
     return n;
   })
   .typedOn(console.info)
