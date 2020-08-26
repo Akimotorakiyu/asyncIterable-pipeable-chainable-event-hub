@@ -1,5 +1,5 @@
 {
-  "name": "event-chain",
+  "name": "asynciterable-pipeable-chainable-event-hub",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
