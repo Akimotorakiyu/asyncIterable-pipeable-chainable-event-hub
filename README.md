@@ -13,7 +13,7 @@ it will be useful when work with `EventEmitter`, `rxjs`, `Socket (Socket extends
 create an `EventLite` instance
 
 ```ts
-import { EventLite } from "event-chain";
+import { EventLite } from "asyncIterable-pipeable-chainable-event-hub";
 
 const eventLite = new EventLite();
 ```
