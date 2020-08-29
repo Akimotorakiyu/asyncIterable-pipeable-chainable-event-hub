@@ -24,9 +24,8 @@ class EventHandle<Args extends unknown[], E> {
     this.eventLite.emit(this.event, ...args);
     return this;
   }
-  handlePipe<V, F>(fn: CallBack<Args, V>): EventHandle<[V], Symbol>;
-  handlePipe<V, F>(fn: CallBack<Args, V>, follow: F): EventHandle<[V], F>;
-  handlePipe<V, F>(fn: CallBack<Args, V>, follow?: F | Symbol) {
+
+  handlePipe<V, F>(fn: CallBack<Args, V>, follow: F) {
     return this.eventLite.pipe(this.event, fn, follow);
   }
 
@@ -214,28 +213,17 @@ export class EventLite {
     return this;
   }
 
-  pipe<Args extends unknown[], V, E>(
-    event: E,
-    fn: CallBack<Args, V>
-  ): EventHandle<[V], Symbol>;
   pipe<Args extends unknown[], V, E, F>(
     event: E,
     fn: CallBack<Args, V>,
-    follow: F
-  ): EventHandle<[V], F>;
-  pipe<Args extends unknown[], V, E, F>(
-    event: E,
-    fn: CallBack<Args, V>,
-    follow?: F | Symbol
+    follow?: F
   ) {
-    const _follow = follow ?? Symbol();
-
     this.on<Args, E>(event, (...args) => {
       const value = fn(...args);
-      this.emit(_follow, value);
+      this.emit(follow, value);
     });
 
-    return new EventHandle<[V], F | Symbol>(this, _follow);
+    return new EventHandle<[V], F>(this, follow);
   }
 
   connect<Args extends unknown[], E = unknown>(
