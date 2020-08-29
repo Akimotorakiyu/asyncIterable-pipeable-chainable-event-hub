@@ -3,6 +3,93 @@ export type CallBack<Args extends unknown[], V = unknown> = (
 ) => V;
 export type CallBackSet = Set<CallBack<unknown[]>>;
 
+class EventHandle<Args extends unknown[], E> {
+  constructor(public eventLite: EventLite, public event: E) {}
+  handleOn(fn: CallBack<Args>) {
+    this.eventLite.on(event, fn);
+    return this;
+  }
+
+  handleOnce(fn: CallBack<Args>) {
+    this.eventLite.once(event, fn);
+    return this;
+  }
+
+  handleRemove(fn: CallBack<Args> | undefined) {
+    this.eventLite.remove(event, fn);
+    return this;
+  }
+
+  handleEmit(...args: Args) {
+    this.eventLite.emit(event, ...args);
+    return this;
+  }
+
+  handlePipe<V, E>(fn: CallBack<Args, V>, follow?: E) {
+    const pipethis = this.eventLite.eventHandle(follow ?? Symbol())<[V]>();
+
+    this.handleOn((...args) => {
+      const value = fn(...args);
+      pipethis.handleEmit(value);
+    });
+
+    return pipethis;
+  }
+
+  handleConnect() {
+    return this.eventLite.connect<Args, E>(this.event);
+  }
+
+  async *iterable<R>() {
+    let resolverPool: [
+      (args: { cancel: (reason: R) => void; data: Args }) => void,
+      (reason: R) => void
+    ][] = [];
+    const pool: Args[] = [];
+
+    function recive(...args: Args) {
+      pool.push(args);
+      deal();
+    }
+
+    this.handleOn(recive);
+
+    let status = true;
+    const cancel = (reason: R) => {
+      status = false;
+      this.handleRemove(recive);
+      deal();
+
+      resolverPool.forEach(([resolve, reject]) => {
+        reject(reason);
+      });
+
+      resolverPool.length = 0;
+      pool.length = 0;
+    };
+
+    const deal = () => {
+      while (resolverPool.length && pool.length) {
+        const [resolve] = resolverPool.shift();
+        const args = pool.shift();
+        resolve({
+          data: args,
+          cancel,
+        });
+      }
+    };
+
+    while (status) {
+      yield new Promise<{ cancel: (reason: R) => void; data: Args }>(
+        (rsolve, reject) => {
+          resolverPool.push([rsolve, reject]);
+          deal();
+        }
+      );
+    }
+  }
+}
+
 /**
  *
  *
@@ -22,9 +109,9 @@ export class EventLite {
    * @returns typed handler
    * @memberof EventLite
    */
-  event<E>(this: EventLite, event: E) {
+  eventHandle<E>(this: EventLite, event: E) {
     return <Args extends unknown[]>() => {
-      return this.typed<Args, E>(event);
+      return new EventHandle<Args, E>(this, event);
     };
   }
 
@@ -47,7 +134,7 @@ export class EventLite {
     }
     callBackSet.add(fn);
 
-    return this.typed<Args, E>(event);
+    return new EventHandle<Args, E>(this, event);
   }
 
   /**
@@ -73,101 +160,7 @@ export class EventLite {
     }
 
     callBackSet.add(fn);
-    return this.typed<Args, E>(event);
-  }
-
-  /**
-   *
-   *
-   * @template Args typeof args for callback
-   * @template E typeof event key
-   * @param {E} event event key
-   * @returns
-   * @memberof EventLite
-   */
-  typed<Args extends unknown[], E = unknown>(this: EventLite, event: E) {
-    const make = {
-      event,
-      async *iterable<R>() {
-        let resolverPool: [
-          (args: { cancel: (reason: R) => void; data: Args }) => void,
-          (reason: R) => void
-        ][] = [];
-        const pool: Args[] = [];
-
-        function recive(...args: Args) {
-          pool.push(args);
-          deal();
-        }
-
-        make.typedOn(recive);
-
-        let status = true;
-        const cancel = (reason: R) => {
-          status = false;
-          make.typedRemove(recive);
-          deal();
-
-          resolverPool.forEach(([resolve, reject]) => {
-            reject(reason);
-          });
-
-          resolverPool.length = 0;
-          pool.length = 0;
-        };
-
-        const deal = () => {
-          while (resolverPool.length && pool.length) {
-            const [resolve] = resolverPool.shift();
-            const args = pool.shift();
-            resolve({
-              data: args,
-              cancel,
-            });
-          }
-        };
-
-        while (status) {
-          yield new Promise<{ cancel: (reason: R) => void; data: Args }>(
-            (rsolve, reject) => {
-              resolverPool.push([rsolve, reject]);
-              deal();
-            }
-          );
-        }
-      },
-      typedOn: (fn: CallBack<Args>) => {
-        this.on(event, fn);
-        return make;
-      },
-      typedOnce: (fn: CallBack<Args>) => {
-        this.once(event, fn);
-        return make;
-      },
-      typedRemove: (fn: CallBack<Args> | undefined) => {
-        this.remove(event, fn);
-        return make;
-      },
-      eventLite: this,
-      typedEmit: (...args: Args) => {
-        this.emit(event, ...args);
-        return make;
-      },
-      typedPipe: <V, E>(fn: CallBack<Args, V>, follow?: E) => {
-        const pipeMake = this.typed<[V]>(follow ?? Symbol());
-
-        make.typedOn((...args) => {
-          const value = fn(...args);
-          pipeMake.typedEmit(value);
-        });
-
-        return pipeMake;
-      },
-      typedConnect: () => {
-        return this.connect<Args, E>(event);
-      },
-    };
-    return make;
+    return new EventHandle<Args, E>(this, event);
   }
 
   /**
@@ -191,7 +184,7 @@ export class EventLite {
 
     this.doOnceMap.delete(event);
 
-    return this.typed<Args, E>(event);
+    return new EventHandle<Args, E>(this, event);
   }
 
   /**
@@ -232,10 +225,10 @@ export class EventLite {
     event: E,
     eventLite = new EventLite()
   ) {
-    const connectionPoint = eventLite.typed<Args, E>(event);
+    const connectionPoint = eventLite.eventHandle(event)<Args>();
 
-    this.typed<Args, E>(event).typedOn((...args) => {
-      connectionPoint.typedEmit(...args);
+    this.eventHandle(event)<Args>().handleOn((...args) => {
+      connectionPoint.handleEmit(...args);
     });
 
     return connectionPoint;
