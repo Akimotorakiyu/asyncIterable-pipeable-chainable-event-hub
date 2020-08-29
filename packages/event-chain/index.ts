@@ -33,53 +33,8 @@ class EventHandle<Args extends unknown[], E> {
     return this.eventLite.connect<Args, E>(this.event);
   }
 
-  async *iterable<R>() {
-    let resolverPool: [
-      (args: { cancel: (reason: R) => void; data: Args }) => void,
-      (reason: R) => void
-    ][] = [];
-    const pool: Args[] = [];
-
-    function recive(...args: Args) {
-      pool.push(args);
-      deal();
-    }
-
-    this.handleOn(recive);
-
-    let status = true;
-    const cancel = (reason: R) => {
-      status = false;
-      this.handleRemove(recive);
-      deal();
-
-      resolverPool.forEach(([resolve, reject]) => {
-        reject(reason);
-      });
-
-      resolverPool.length = 0;
-      pool.length = 0;
-    };
-
-    const deal = () => {
-      while (resolverPool.length && pool.length) {
-        const [resolve] = resolverPool.shift();
-        const args = pool.shift();
-        resolve({
-          data: args,
-          cancel,
-        });
-      }
-    };
-
-    while (status) {
-      yield new Promise<{ cancel: (reason: R) => void; data: Args }>(
-        (rsolve, reject) => {
-          resolverPool.push([rsolve, reject]);
-          deal();
-        }
-      );
-    }
+  async *iterable<R = unknown>() {
+    return this.eventLite.iterable<Args, R, E>(this.event);
   }
 }
 
@@ -214,6 +169,7 @@ export class EventLite {
   }
 
   pipe<Args extends unknown[], V, E, F>(
+    this: EventLite,
     event: E,
     fn: CallBack<Args, V>,
     follow?: F
@@ -238,5 +194,57 @@ export class EventLite {
     });
 
     return connectionPoint;
+  }
+
+  async *iterable<Args extends unknown[], R = unknown, E = unknown>(
+    this: EventLite,
+    event: E
+  ) {
+    let resolverPool: [
+      (args: { cancel: (reason: R) => void; data: Args }) => void,
+      (reason: R) => void
+    ][] = [];
+    const pool: Args[] = [];
+
+    function recive(...args: Args) {
+      pool.push(args);
+      deal();
+    }
+
+    this.on(event, recive);
+
+    let status = true;
+    const cancel = (reason: R) => {
+      status = false;
+      this.remove(event, recive);
+      deal();
+
+      resolverPool.forEach(([resolve, reject]) => {
+        reject(reason);
+      });
+
+      resolverPool.length = 0;
+      pool.length = 0;
+    };
+
+    const deal = () => {
+      while (resolverPool.length && pool.length) {
+        const [resolve] = resolverPool.shift();
+        const args = pool.shift();
+        resolve({
+          data: args,
+          cancel,
+        });
+      }
+    };
+
+    while (status) {
+      yield new Promise<{ cancel: (reason: R) => void; data: Args }>(
+        (rsolve, reject) => {
+          resolverPool.push([rsolve, reject]);
+          deal();
+        }
+      );
+    }
   }
 }

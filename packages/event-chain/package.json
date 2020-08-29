@@ -1,6 +1,6 @@
 {
   "name": "asynciterable-pipeable-chainable-event-hub",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "main": "index.js",
   "author": "瓦姆乌·湫曗 <autumnsilverleaves@gmail.com>",
   "keywords": [
