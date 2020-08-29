@@ -11,7 +11,7 @@ It will be useful when work with `EventEmitter`, `rxjs`, `Socket (Socket extends
 ```bash
 npm install asyncIterable-pipeable-chainable-event-hub
 #or
-yarn add asynciterable-pipeable-chainable-event-hub
+yarn add asyncIterable-pipeable-chainable-event-hub
 ```
 
 ### Create an instance

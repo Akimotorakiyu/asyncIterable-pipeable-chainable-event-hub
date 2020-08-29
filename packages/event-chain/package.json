@@ -1,7 +1,15 @@
 {
   "name": "asynciterable-pipeable-chainable-event-hub",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "main": "index.js",
+  "author": "瓦姆乌·湫曗 <autumnsilverleaves@gmail.com>",
+  "keywords": [
+    "eventhub",
+    "eventbus",
+    "eventEmitter",
+    "rxjs"
+  ],
+  "repository": "https://github.com/Akimotorakiyu/asyncIterable-pipeable-chainable-event-hub",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
