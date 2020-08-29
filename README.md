@@ -21,7 +21,7 @@ const eventLite = new EventLite();
 optional but useful `event hub`
 
 ```ts
-const someEvent = eventLite.event("eventName")<[number, string]>();
+const someEvent = eventLite.eventHandle("eventName")<[number, string]>();
 ```
 
 ### Emit
@@ -32,7 +32,7 @@ const someEvent = eventLite.event("eventName")<[number, string]>();
 let i = 0;
 setInterval(() => {
   // with type check
-  someEvent.typedEmit(++i, i + "");
+  someEvent.handleEmit(++i, i + "");
   // or without type check
   eventLite.emit("eventName", ++i, i + "");
 }, 1000);
@@ -44,23 +44,23 @@ setInterval(() => {
 
 ```ts
 // or
-someEvent.typedOn(console.info).typedOnce(console.log).typedRemove();
+someEvent.handleOn(console.info).handleOnce(console.log).handleRemove();
 
 // or
 eventLite
   .on("eventName", (n: number, s: string) => {
     console.log(n, s);
   })
-  .typedOn(console.info)
-  .typedOnce(console.log)
-  .typedRemove(undefined);
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined);
 
 // or
 eventLite
-  .event("eventName")<[number, string]>()
-  .typedOn(console.info)
-  .typedOnce(console.log)
-  .typedRemove(undefined);
+  .eventHandle("eventName")<[number, string]>()
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined);
 ```
 
 ### Async Iterable
@@ -79,22 +79,22 @@ for await (const { data, cancel } of someEvent.iterable()) {
 
 ```ts
 const followEvent = someEvent
-  .typedPipe((n, s) => {
+  .handlePipe((n, s) => {
     return n;
   })
-  .typedOn(console.info)
-  .typedOnce(console.log)
-  .typedRemove(undefined);
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined);
 ```
 
 `connect` and `pipe` to a another or a new EventLite instance
 
 ```ts
 const followEventLite = someEvent
-  .typedConnect()
-  .typedOn(console.info)
-  .typedOnce(console.log)
-  .typedRemove(undefined).eventLite;
+  .handleConnect()
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined).eventLite;
 ```
 
 ## Note: about remove

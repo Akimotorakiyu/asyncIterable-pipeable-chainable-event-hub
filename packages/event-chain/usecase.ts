@@ -2,35 +2,38 @@ import { EventLite } from "./index";
 
 const eventLite = new EventLite();
 
-const someEvent = eventLite.event("eventName")<[number, string]>();
+const someEvent = eventLite.eventHandle("eventName")<[number, string]>();
 
 let i = 0;
 
 setInterval(() => {
   // with type check
-  someEvent.typedEmit(++i, i + "");
+  someEvent.handleEmit(++i, i + "");
   // or without type check
   eventLite.emit("eventName", ++i, i + "");
 }, 1000);
 
 // or
-someEvent.typedOn(console.info).typedOnce(console.log).typedRemove(undefined);
+someEvent
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined);
 
 // or
 eventLite
   .on("eventName", (n: number, s: string) => {
     console.log(n, s);
   })
-  .typedOn(console.info)
-  .typedOnce(console.log)
-  .typedRemove(undefined);
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined);
 
 // or
 eventLite
-  .event("eventName")<[number, string]>()
-  .typedOn(console.info)
-  .typedOnce(console.log)
-  .typedRemove(undefined);
+  .eventHandle("eventName")<[number, string]>()
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined);
 
 async function name() {
   for await (const { data, cancel } of someEvent.iterable()) {
@@ -41,18 +44,18 @@ async function name() {
 name();
 
 const follow = someEvent
-  .typedPipe((n, s) => {
+  .handlePipe((n, s) => {
     return n;
   })
-  .typedOn(console.info)
-  .typedOnce(console.log)
-  .typedRemove(undefined);
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined);
 
 const followEventLite = someEvent
-  .typedConnect()
-  .typedOn(console.info)
-  .typedOnce(console.log)
-  .typedRemove(undefined);
+  .handleConnect()
+  .handleOn(console.info)
+  .handleOnce(console.log)
+  .handleRemove(undefined);
 
 const eventListener = console.log;
 
