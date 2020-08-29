@@ -4,5 +4,6 @@
     "module": "UMD",
     "noUnusedLocals": true,
     "sourceMap": true
-  }
+  },
+  "files": ["index.ts"]
 }

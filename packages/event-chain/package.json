@@ -1,10 +1,14 @@
 {
   "name": "asynciterable-pipeable-chainable-event-hub",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "registry-taobao": "npm config set registry https://registry.npm.taobao.org",
+    "registry-npm": "npm config set registry http://registry.npmjs.org/",
+    "pub": "npm run registry-npm && npm publish && npm run registry-taobao",
+    "pubbeta": "npm run registry-npm && npm publish --tag=beta && npm run registry-taobao"
   },
   "devDependencies": {
     "ts-node": "^8.10.2",
