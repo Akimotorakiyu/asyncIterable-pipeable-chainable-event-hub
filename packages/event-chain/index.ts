@@ -6,22 +6,22 @@ export type CallBackSet = Set<CallBack<unknown[]>>;
 class EventHandle<Args extends unknown[], E> {
   constructor(public eventLite: EventLite, public event: E) {}
   handleOn(fn: CallBack<Args>) {
-    this.eventLite.on(event, fn);
+    this.eventLite.on(this.event, fn);
     return this;
   }
 
   handleOnce(fn: CallBack<Args>) {
-    this.eventLite.once(event, fn);
+    this.eventLite.once(this.event, fn);
     return this;
   }
 
   handleRemove(fn: CallBack<Args> | undefined) {
-    this.eventLite.remove(event, fn);
+    this.eventLite.remove(this.event, fn);
     return this;
   }
 
   handleEmit(...args: Args) {
-    this.eventLite.emit(event, ...args);
+    this.eventLite.emit(this.event, ...args);
     return this;
   }
 

@@ -6,12 +6,12 @@ describe("on", () => {
 
     const r = Math.random();
 
-    const someEvent = eventLite.event("eventName");
+    const someEvent = eventLite.eventHandle("eventName");
     someEvent()
-      .typedOn((n) => {
+      .handleOn((n) => {
         expect(n).toBe(r);
       })
-      .typedEmit(r);
+      .handleEmit(r);
   });
 });
 
