@@ -33,7 +33,7 @@ class EventHandle<Args extends unknown[], E> {
     return this.eventLite.connect<Args, E>(this.event);
   }
 
-  async *iterable<R = unknown>() {
+  iterable<R = unknown>() {
     return this.eventLite.iterable<Args, R, E>(this.event);
   }
 }
