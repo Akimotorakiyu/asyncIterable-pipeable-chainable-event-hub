@@ -7,12 +7,24 @@ class EventHandle<Args extends unknown[], E> {
   constructor(public eventLite: EventLite, public event: E) {}
   handleOn(fn: CallBack<Args>) {
     this.eventLite.on(this.event, fn);
-    return this;
+    return {
+      cancel: () => {
+        this.handleRemove(fn);
+        return this;
+      },
+      eventHandle: this,
+    };
   }
 
   handleOnce(fn: CallBack<Args>) {
     this.eventLite.once(this.event, fn);
-    return this;
+    return {
+      cancel: () => {
+        this.handleRemove(fn);
+        return this;
+      },
+      eventHandle: this,
+    };
   }
 
   handleRemove(fn: CallBack<Args> | undefined) {
@@ -33,8 +45,12 @@ class EventHandle<Args extends unknown[], E> {
     return this.eventLite.connect<Args, E>(this.event);
   }
 
-  iterable<R = unknown>() {
-    return this.eventLite.iterable<Args, R, E>(this.event);
+  handleAsyncIterable<R = unknown>() {
+    return this.eventLite.asyncIterable<Args, R, E>(this.event);
+  }
+
+  handelePromise() {
+    return this.eventLite.promise(this.event)<Args>();
   }
 }
 
@@ -60,6 +76,26 @@ export class EventLite {
   eventHandle<E>(this: EventLite, event: E) {
     return <Args extends unknown[]>() => {
       return new EventHandle<Args, E>(this, event);
+    };
+  }
+
+  promise<E>(this: EventLite, event: E, timeout: number = 0) {
+    return <Args extends unknown[]>() => {
+      return new Promise<Args>((resolve, reject) => {
+        const eventHandle = this.eventHandle(event)<Args>();
+
+        const handle = (...args: Args) => {
+          clearTimeout(h);
+          resolve(args);
+        };
+
+        const h = setTimeout(() => {
+          eventHandle.handleRemove(handle);
+          reject("timeout");
+        }, timeout);
+
+        eventHandle.handleOnce(handle);
+      });
     };
   }
 
@@ -196,7 +232,7 @@ export class EventLite {
     return connectionPoint;
   }
 
-  async *iterable<Args extends unknown[], R = unknown, E = unknown>(
+  async *asyncIterable<Args extends unknown[], R = unknown, E = unknown>(
     this: EventLite,
     event: E
   ) {
