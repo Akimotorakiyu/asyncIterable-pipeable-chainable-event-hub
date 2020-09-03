@@ -5,7 +5,13 @@ export type CallBackSet = Set<CallBack<unknown[]>>;
 
 class EventHandle<Args extends unknown[], E> {
   constructor(public eventLite: EventLite, public event: E) {}
+
   handleOn(fn: CallBack<Args>) {
+    this.eventLite.on(this.event, fn);
+    return this;
+  }
+
+  handleOnCancelable(fn: CallBack<Args>) {
     this.eventLite.on(this.event, fn);
     return {
       cancel: () => {
@@ -17,6 +23,11 @@ class EventHandle<Args extends unknown[], E> {
   }
 
   handleOnce(fn: CallBack<Args>) {
+    this.eventLite.once(this.event, fn);
+    return this;
+  }
+
+  handleOnceCancelable(fn: CallBack<Args>) {
     this.eventLite.once(this.event, fn);
     return {
       cancel: () => {
@@ -38,7 +49,8 @@ class EventHandle<Args extends unknown[], E> {
   }
 
   handlePipe<V, F>(fn: CallBack<Args, V>, follow: F) {
-    return this.eventLite.pipe(this.event, fn, follow);
+    this.eventLite.pipe(this.event, fn, follow);
+    return this;
   }
 
   handleConnect() {
@@ -118,6 +130,25 @@ export class EventLite {
     }
     callBackSet.add(fn);
 
+    return this;
+  }
+
+  /**
+   *
+   *
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {E} event event key
+   * @param {CallBack<Args>} fn callback
+   * @returns
+   * @memberof EventLite
+   */
+  handleOn<Args extends unknown[], E>(
+    this: EventLite,
+    event: E,
+    fn: CallBack<Args>
+  ) {
+    this.on(event, fn);
     return new EventHandle<Args, E>(this, event);
   }
 
@@ -151,6 +182,25 @@ export class EventLite {
    *
    *
    * @template Args typeof args for callback
+   * @template E  typeof event key
+   * @param {E} event event key
+   * @param {CallBack<Args>} fn callback
+   * @returns
+   * @memberof EventLite
+   */
+  handleOnce<Args extends unknown[], E>(
+    this: EventLite,
+    event: E,
+    fn: CallBack<Args>
+  ) {
+    this.handleOnce(event, fn);
+    return new EventHandle<Args, E>(this, event);
+  }
+
+  /**
+   *
+   *
+   * @template Args typeof args for callback
    * @template E typeof event key
    * @param {E} event event key
    * @param {...Args} args args
@@ -167,6 +217,26 @@ export class EventLite {
     });
 
     this.doOnceMap.delete(event);
+
+    return new EventHandle<Args, E>(this, event);
+  }
+
+  /**
+   *
+   *
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {E} event event key
+   * @param {...Args} args args
+   * @returns
+   * @memberof EventLite
+   */
+  handleEmit<Args extends unknown[], E>(
+    this: EventLite,
+    event: E,
+    ...args: Args
+  ) {
+    this.emit(event, ...args);
 
     return new EventHandle<Args, E>(this, event);
   }
@@ -208,14 +278,24 @@ export class EventLite {
     this: EventLite,
     event: E,
     fn: CallBack<Args, V>,
-    follow?: F
+    follow: F
   ) {
     this.on<Args, E>(event, (...args) => {
       const value = fn(...args);
       this.emit(follow, value);
     });
 
-    return new EventHandle<[V], F>(this, follow);
+    return this;
+  }
+
+  handlePipe<Args extends unknown[], V, E, F>(
+    this: EventLite,
+    event: E,
+    fn: CallBack<Args, V>,
+    follow?: F
+  ) {
+    this.pipe(event, fn, follow);
+    return new EventHandle<Args, E>(this, event);
   }
 
   connect<Args extends unknown[], E = unknown>(

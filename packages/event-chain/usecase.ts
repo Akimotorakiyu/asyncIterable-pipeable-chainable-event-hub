@@ -21,7 +21,7 @@ someEvent
 
 // or
 eventLite
-  .on("eventName", (n: number, s: string) => {
+  .handleOn("eventName", (n: number, s: string) => {
     console.log(n, s);
   })
   .handleOn(console.info)
@@ -36,7 +36,7 @@ eventLite
   .handleRemove(undefined);
 
 async function name() {
-  for await (const { data, cancel } of someEvent.iterable()) {
+  for await (const { data, cancel } of someEvent.handleAsyncIterable()) {
     console.log(data);
   }
 }
@@ -46,7 +46,7 @@ name();
 const follow = someEvent
   .handlePipe((n, s) => {
     return n;
-  })
+  }, "follow")
   .handleOn(console.info)
   .handleOnce(console.log)
   .handleRemove(undefined);
