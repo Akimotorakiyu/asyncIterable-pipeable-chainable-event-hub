@@ -1,17 +1,17 @@
-# asyncIterable-pipeable-chainable-event-hub
+# async-iterable-pipeable-chainable-event-hub
 
-![CI/test](https://github.com/Akimotorakiyu/asyncIterable-pipeable-chainable-event-hub/workflows/CI/test/badge.svg)
+![CI/test](https://github.com/Akimotorakiyu/async-iterable-pipeable-chainable-event-hub/workflows/CI/test/badge.svg)
 
-`chainable`, `asyncIterable`, `pipeable` with `type infer`
+`chainable`, `async`, `iterable`, `pipeable` with `type infer`
 
 It will be useful when work with `EventEmitter`, `rxjs`, `Socket (Socket extends EventEmitter)` or other `event driven` bussiness.
 
 ## Example
 
 ```bash
-npm install asyncIterable-pipeable-chainable-event-hub
+npm install async-iterable-pipeable-chainable-event-hub
 #or
-yarn add asynciterable-pipeable-chainable-event-hub
+yarn add async-iterable-pipeable-chainable-event-hub
 ```
 
 ### Create an instance
@@ -19,7 +19,7 @@ yarn add asynciterable-pipeable-chainable-event-hub
 create an `EventLite` instance
 
 ```ts
-import { EventLite } from "asyncIterable-pipeable-chainable-event-hub";
+import { EventLite } from "async-iterable-pipeable-chainable-event-hub";
 
 const eventLite = new EventLite();
 ```
