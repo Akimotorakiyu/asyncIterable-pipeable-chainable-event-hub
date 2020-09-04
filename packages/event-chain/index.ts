@@ -208,11 +208,14 @@ export class EventLite {
    * @memberof EventLite
    */
   emit<Args extends unknown[], E>(this: EventLite, event: E, ...args: Args) {
+    const doOnce = this.doOnceMap.get(event);
+
     this.doMap.get(event)?.forEach((fn) => {
+      doOnce?.delete(fn);
       fn(...args);
     });
 
-    this.doOnceMap.get(event)?.forEach((fn) => {
+    doOnce?.forEach((fn) => {
       fn(...args);
     });
 
