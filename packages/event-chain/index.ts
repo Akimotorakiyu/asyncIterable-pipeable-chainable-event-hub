@@ -49,8 +49,7 @@ class EventHandle<Args extends unknown[], E> {
   }
 
   handlePipe<V, F>(fn: CallBack<Args, V>, follow: F) {
-    this.eventLite.pipe(this.event, fn, follow);
-    return this;
+    return this.eventLite.pipe(this.event, fn, follow);
   }
 
   handleConnect() {
@@ -295,10 +294,10 @@ export class EventLite {
     this: EventLite,
     event: E,
     fn: CallBack<Args, V>,
-    follow?: F
+    follow: F
   ) {
     this.pipe(event, fn, follow);
-    return new EventHandle<Args, E>(this, event);
+    return new EventHandle<[V], F>(this, follow);
   }
 
   connect<Args extends unknown[], E = unknown>(
