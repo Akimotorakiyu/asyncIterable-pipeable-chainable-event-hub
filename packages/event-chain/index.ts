@@ -367,3 +367,99 @@ export class EventLite {
     }
   }
 }
+
+export type CallBackWithCancel<Args extends unknown[], E, V = unknown> = (
+  eventWatcherHandle: EventWatcherHandle<Args, E>,
+  ...args: Args
+) => V;
+// export type CallBackSet = Set<CallBack<unknown[]>>;
+
+class EventWatcherHandle<Args extends unknown[], E> {
+  constructor(
+    public eventWatcher: EventWatcher,
+    public event: E,
+    public fn: CallBackWithCancel<Args, E>
+  ) {}
+
+  cancel() {
+    this.eventWatcher.remove(event, this.fn);
+    return this;
+  }
+
+  start() {
+    const map = this.eventWatcher.doMap;
+    let callBackSet: CallBackSet;
+    if (!(callBackSet = map.get(event))) {
+      map.set(event, (callBackSet = new Set()));
+    }
+    callBackSet.add(this.fn);
+    return this;
+  }
+
+  emit(...args: Args) {
+    this.eventWatcher.emit(this.event, ...args);
+  }
+}
+
+export class EventWatcher {
+  doMap = new Map<unknown, CallBackSet>();
+  constructor() {}
+  /**
+   *
+   *
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {E} event event key
+   * @param {CallBack<Args>} fn callback
+   * @returns
+   * @memberof EventLite
+   */
+  on<Args extends unknown[], E>(event: E, fn: CallBackWithCancel<Args, E>) {
+    return new EventWatcherHandle(this, event, fn).start();
+  }
+
+  /**
+   *
+   *
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {E} event event key
+   * @param {...Args} args args
+   * @returns
+   * @memberof EventLite
+   */
+  emit<Args extends unknown[], E>(event: E, ...args: Args) {
+    this.doMap.get(event)?.forEach((fn) => {
+      fn(new EventWatcherHandle(this, event, fn), ...args);
+    });
+
+    return this;
+  }
+
+  /**
+   *
+   *
+   * @template Args typeof args for callback
+   * @template E typeof event key
+   * @param {(E | undefined)} event event key
+   * @param {(CallBack<Args> | undefined)} fn callback
+   * @returns current EventLite instance
+   * @memberof EventLite
+   */
+  remove<Args extends unknown[], E>(
+    event: E | undefined,
+    fn: CallBack<Args> | undefined
+  ) {
+    if (event && fn) {
+      this.doMap.get(event)?.delete(fn);
+    } else if (fn) {
+      this.doMap.forEach((set) => {
+        set.delete(fn);
+      });
+    } else if (event) {
+      this.doMap.delete(event);
+    }
+
+    return this;
+  }
+}
