@@ -73,6 +73,36 @@ class EventLite {
       });
     };
   }
+
+  pipe<Args extends unknown[], V, E, F>(
+    this: EventLite,
+    event: E,
+    fn: CallBack<Args, V>,
+    follow: F
+  ) {
+    const watcher = new EventWatcher(this, event, (watcher) => {
+      return (...args: Args) => {
+        const value = fn(...args);
+        watcher.eventLite.emit(follow, value);
+      };
+    });
+
+    return this;
+  }
+
+  connect<Args extends unknown[], E = unknown>(
+    this: EventLite,
+    event: E,
+    eventLite = new EventLite()
+  ) {
+    const watcher = new EventWatcher(eventLite, event, (watcher) => {
+      return (...args: Args) => {
+        watcher.emit(...args);
+      };
+    });
+
+    return this;
+  }
 }
 
 class EventWatcher<Args extends unknown[], E> {
