@@ -55,16 +55,16 @@ class EventLite {
             watcher.cancal();
             reject("timeout");
           }, timeout);
-          const watcher = new EventWatcher(this, event, (watcher) => {
-            return (...args: Args) => {
+          const watcher = new EventWatcher<Args, E>(this, event, (watcher) => {
+            return (...args) => {
               clearTimeout(h);
               resolve(args);
               watcher.cancal();
             };
           });
         } else {
-          const watcher = new EventWatcher(this, event, (watcher) => {
-            return (...args: Args) => {
+          const watcher = new EventWatcher<Args, E>(this, event, (watcher) => {
+            return (...args) => {
               resolve(args);
               watcher.cancal();
             };
@@ -79,27 +79,33 @@ class EventLite {
     fn: CallBack<Args, V>,
     follow: F
   ) {
-    const watcher = new EventWatcher(this, event, (watcher) => {
-      return (...args: Args) => {
+    const watcher = new EventWatcher<Args, E>(this, event, (watcher) => {
+      return (...args) => {
         const value = fn(...args);
         watcher.eventLite.emit(follow, value);
       };
     });
 
-    return this;
+    return {
+      socket: watcher,
+      follow: new EventHandle<[V], E>(this, event),
+    };
   }
 
   connect<Args extends unknown[], E = unknown>(
     event: E,
     eventLite = new EventLite()
   ) {
-    const watcher = new EventWatcher(eventLite, event, (watcher) => {
-      return (...args: Args) => {
+    const watcher = new EventWatcher<Args, E>(eventLite, event, (watcher) => {
+      return (...args) => {
         watcher.emit(...args);
       };
     });
 
-    return this;
+    return {
+      src: new EventHandle<Args, E>(this, event),
+      socket: watcher,
+    };
   }
 
   async *asyncIterable<Args extends unknown[], R = unknown, E = unknown>(
@@ -116,8 +122,8 @@ class EventLite {
     ][] = [];
     const argsPool: Args[] = [];
 
-    const watcher = new EventWatcher(this, event, (watcher) => {
-      return (...args: Args) => {
+    const watcher = new EventWatcher<Args, E>(this, event, (watcher) => {
+      return (...args) => {
         argsPool.push(args);
         deal();
       };
@@ -196,12 +202,14 @@ class EventHandle<Args extends unknown[], E> {
 
 class EventWatcher<Args extends unknown[], E> {
   fn: CallBack<Args>;
+  eventHandle: EventHandle<Args, E>;
   constructor(
     public eventLite: EventLite,
     public event: E,
     genFn: (eventWatcher: EventWatcher<Args, E>) => CallBack<Args>
   ) {
     this.fn = genFn(this);
+    this.eventHandle = new EventHandle<Args, E>(eventLite, event);
   }
 
   start() {
