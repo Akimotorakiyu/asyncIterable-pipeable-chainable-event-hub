@@ -6,25 +6,22 @@ export type CallBackSet = Set<CallBack<unknown[]>>;
 class EventHandle<Args extends unknown[], E> {
   constructor(public eventLite: EventLite, public event: E) {}
 
-  handleOn(fn: CallBack<Args>) {
-    this.eventLite.on(this.event, fn);
-    return this;
-  }
-
   handleOnCancelable(fn: CallBack<Args>) {
-    this.eventLite.on(this.event, fn);
-    return {
+    const handler = {
       cancel: () => {
         this.handleRemove(fn);
-        return this;
+        return handler;
+      },
+      start: () => {
+        this.eventLite.on(this.event, fn);
+        return handler;
       },
       eventHandle: this,
     };
-  }
 
-  handleOnce(fn: CallBack<Args>) {
-    this.eventLite.once(this.event, fn);
-    return this;
+    handler.start();
+
+    return handler;
   }
 
   handleOnceCancelable(fn: CallBack<Args>) {
@@ -38,6 +35,16 @@ class EventHandle<Args extends unknown[], E> {
     };
   }
 
+  // 需要返回当前对象
+  handleOn(fn: CallBack<Args>) {
+    this.eventLite.on(this.event, fn);
+    return this;
+  }
+  handleOnce(fn: CallBack<Args>) {
+    this.eventLite.once(this.event, fn);
+    return this;
+  }
+
   handleRemove(fn: CallBack<Args> | undefined) {
     this.eventLite.remove(this.event, fn);
     return this;
@@ -48,6 +55,7 @@ class EventHandle<Args extends unknown[], E> {
     return this;
   }
 
+  // 需要返回返回的内容
   handlePipe<V, F>(fn: CallBack<Args, V>, follow: F) {
     return this.eventLite.pipe(this.event, fn, follow);
   }
@@ -374,23 +382,29 @@ export type CallBackWithCancel<Args extends unknown[], E, V = unknown> = (
 // export type CallBackSet = Set<CallBack<unknown[]>>;
 
 class EventWatcherHandle<Args extends unknown[], E> {
+  fn: CallBackWithCancel<Args, E>;
   constructor(
     public eventWatcher: EventWatcher,
     public event: E,
-    public fn: CallBackWithCancel<Args, E>
-  ) {}
+    genfn: (
+      eventWatcherHandle: EventWatcherHandle<Args, E>
+    ) => CallBackWithCancel<Args, E>
+  ) {
+    this.fn = genfn(this);
+  }
 
   cancel() {
-    this.eventWatcher.remove(event, this.fn);
+    this.eventWatcher.remove(this.event, this.fn);
     return this;
   }
 
   start() {
     const map = this.eventWatcher.doMap;
     let callBackSet: CallBackSet;
-    if (!(callBackSet = map.get(event))) {
-      map.set(event, (callBackSet = new Set()));
+    if (!(callBackSet = map.get(this.event))) {
+      map.set(this.event, (callBackSet = new Set()));
     }
+
     callBackSet.add(this.fn);
     return this;
   }
@@ -402,6 +416,7 @@ class EventWatcherHandle<Args extends unknown[], E> {
 
 export class EventWatcher {
   doMap = new Map<unknown, CallBackSet>();
+
   constructor() {}
   /**
    *
@@ -413,8 +428,13 @@ export class EventWatcher {
    * @returns
    * @memberof EventLite
    */
-  on<Args extends unknown[], E>(event: E, fn: CallBackWithCancel<Args, E>) {
-    return new EventWatcherHandle(this, event, fn).start();
+  on<Args extends unknown[], E>(
+    event: E,
+    genfn: (
+      eventWatcherHandle: EventWatcherHandle<Args, E>
+    ) => CallBackWithCancel<Args, E>
+  ) {
+    return new EventWatcherHandle(this, event, genfn).start();
   }
 
   /**
@@ -429,9 +449,8 @@ export class EventWatcher {
    */
   emit<Args extends unknown[], E>(event: E, ...args: Args) {
     this.doMap.get(event)?.forEach((fn) => {
-      fn(new EventWatcherHandle(this, event, fn), ...args);
+      fn(...args);
     });
-
     return this;
   }
 
