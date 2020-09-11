@@ -103,6 +103,62 @@ class EventLite {
 
     return this;
   }
+
+  async *asyncIterable<Args extends unknown[], R = unknown, E = unknown>(
+    this: EventLite,
+    event: E
+  ) {
+    type MyAsyncIterator = {
+      cancel: (reason: R) => void;
+      args: Args;
+    };
+
+    let resolverPool: [
+      (myAsyncIterator: MyAsyncIterator) => void,
+      (reason: R) => void
+    ][] = [];
+    const argsPool: Args[] = [];
+
+    const watcher = new EventWatcher(this, event, (watcher) => {
+      return (...args: Args) => {
+        argsPool.push(args);
+        deal();
+      };
+    });
+
+    let status = true;
+
+    const cancel = (reason: R) => {
+      status = false;
+      watcher.cancal();
+      deal();
+
+      resolverPool.forEach(([resolve, reject]) => {
+        reject(reason);
+      });
+
+      resolverPool.length = 0;
+      argsPool.length = 0;
+    };
+
+    const deal = () => {
+      while (resolverPool.length && argsPool.length) {
+        const [resolve, reject] = resolverPool.shift();
+        const args = argsPool.shift();
+        resolve({
+          args,
+          cancel,
+        });
+      }
+    };
+
+    while (status) {
+      yield new Promise<MyAsyncIterator>((rsolve, reject) => {
+        resolverPool.push([rsolve, reject]);
+        deal();
+      });
+    }
+  }
 }
 
 class EventWatcher<Args extends unknown[], E> {
