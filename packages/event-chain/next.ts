@@ -47,7 +47,7 @@ class EventLite {
     return this;
   }
 
-  promise<E>(this: EventLite, event: E, timeout: number = -1) {
+  promise<E>(event: E, timeout: number = -1) {
     return <Args extends unknown[]>() => {
       return new Promise<Args>((resolve, reject) => {
         if (timeout >= 0) {
@@ -75,7 +75,6 @@ class EventLite {
   }
 
   pipe<Args extends unknown[], V, E, F>(
-    this: EventLite,
     event: E,
     fn: CallBack<Args, V>,
     follow: F
@@ -91,7 +90,6 @@ class EventLite {
   }
 
   connect<Args extends unknown[], E = unknown>(
-    this: EventLite,
     event: E,
     eventLite = new EventLite()
   ) {
@@ -105,7 +103,6 @@ class EventLite {
   }
 
   async *asyncIterable<Args extends unknown[], R = unknown, E = unknown>(
-    this: EventLite,
     event: E
   ) {
     type MyAsyncIterator = {
@@ -158,6 +155,30 @@ class EventLite {
         deal();
       });
     }
+  }
+
+  handleEvent<E>(event: E) {
+    return <Args extends unknown[]>() => {
+      return new EventHandle<Args, E>(this, event);
+    };
+  }
+}
+
+class EventHandle<Args extends unknown[], E> {
+  constructor(public eventLite: EventLite, public event: E) {}
+
+  on(genFn: (eventWatcher: EventWatcher<Args, E>) => CallBack<Args>) {
+    const watcher = this.eventLite.on(this.event, genFn);
+    return watcher;
+  }
+
+  emit(...args: Args) {
+    this.eventLite.emit(this.event, ...args);
+    return this;
+  }
+
+  clear() {
+    this.eventLite.remove(this.event, undefined);
   }
 }
 
