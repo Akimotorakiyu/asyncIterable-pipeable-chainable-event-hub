@@ -46,6 +46,33 @@ class EventLite {
     });
     return this;
   }
+
+  promise<E>(this: EventLite, event: E, timeout: number = -1) {
+    return <Args extends unknown[]>() => {
+      return new Promise<Args>((resolve, reject) => {
+        if (timeout >= 0) {
+          const h = setTimeout(() => {
+            watcher.cancal();
+            reject("timeout");
+          }, timeout);
+          const watcher = new EventWatcher(this, event, (watcher) => {
+            return (...args: Args) => {
+              clearTimeout(h);
+              resolve(args);
+              watcher.cancal();
+            };
+          });
+        } else {
+          const watcher = new EventWatcher(this, event, (watcher) => {
+            return (...args: Args) => {
+              resolve(args);
+              watcher.cancal();
+            };
+          });
+        }
+      });
+    };
+  }
 }
 
 class EventWatcher<Args extends unknown[], E> {
