@@ -180,6 +180,18 @@ class EventHandle<Args extends unknown[], E> {
   clear() {
     this.eventLite.remove(this.event, undefined);
   }
+
+  promise() {
+    return this.eventLite.promise(this.event);
+  }
+
+  connect(eventLite = new EventLite()) {
+    return this.eventLite.connect(eventLite);
+  }
+
+  pipe<V, F>(fn: CallBack<Args, V>, follow: F) {
+    return this.eventLite.pipe(this.event, fn, follow);
+  }
 }
 
 class EventWatcher<Args extends unknown[], E> {
