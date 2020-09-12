@@ -14,6 +14,12 @@ class EventLite {
     return new EventWatcher(this, event, genFn).start();
   }
 
+  onLite<Args extends unknown[], E>(event: E, fn: CallBack<Args>) {
+    return new EventWatcher(this, event, (eventWatcher) => {
+      return fn;
+    }).start();
+  }  
+
   remove<Args extends unknown[], E>(
     event: E | undefined,
     fn: CallBack<Args> | undefined
