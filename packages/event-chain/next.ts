@@ -163,7 +163,7 @@ class EventLite {
     }
   }
 
-  handleEvent<E>(event: E) {
+  event<E>(event: E) {
     return <Args extends unknown[]>() => {
       return new EventHandle<Args, E>(this, event);
     };
@@ -233,19 +233,3 @@ class EventWatcher<Args extends unknown[], E> {
     return this;
   }
 }
-
-const eventLite = new EventLite();
-
-// once
-eventLite.on("eat", (watcher) => {
-  return () => {
-    console.log("only eat once");
-    watcher.cancal();
-  };
-});
-// on
-eventLite.on("eat", (watcher) => {
-  return () => {
-    console.log("eat");
-  };
-});
