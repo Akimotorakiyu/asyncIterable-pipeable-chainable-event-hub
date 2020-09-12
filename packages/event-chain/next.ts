@@ -2,7 +2,7 @@ export type CallBack<Args extends unknown[], V = void> = (...args: Args) => V;
 
 export type CallBackSet = Set<CallBack<unknown[]>>;
 
-class EventLite {
+export class EventLite {
   doMap = new Map<unknown, CallBackSet>();
 
   constructor() {}
@@ -18,7 +18,7 @@ class EventLite {
     return new EventWatcher(this, event, (eventWatcher) => {
       return fn;
     }).start();
-  }  
+  }
 
   remove<Args extends unknown[], E>(
     event: E | undefined,
@@ -176,11 +176,16 @@ class EventLite {
   }
 }
 
-class EventHandle<Args extends unknown[], E> {
+export class EventHandle<Args extends unknown[], E> {
   constructor(public eventLite: EventLite, public event: E) {}
 
   on(genFn: (eventWatcher: EventWatcher<Args, E>) => CallBack<Args>) {
     const watcher = this.eventLite.on(this.event, genFn);
+    return watcher;
+  }
+
+  onLite(fn: CallBack<Args>) {
+    const watcher = this.eventLite.onLite(this.event, fn);
     return watcher;
   }
 
@@ -206,7 +211,7 @@ class EventHandle<Args extends unknown[], E> {
   }
 }
 
-class EventWatcher<Args extends unknown[], E> {
+export class EventWatcher<Args extends unknown[], E> {
   fn: CallBack<Args>;
   eventHandle: EventHandle<Args, E>;
   constructor(
