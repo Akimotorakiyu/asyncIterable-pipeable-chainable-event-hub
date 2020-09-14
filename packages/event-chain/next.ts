@@ -198,8 +198,8 @@ export class EventHandle<Args extends unknown[], E> {
     this.eventLite.remove(this.event, undefined);
   }
 
-  promise() {
-    return this.eventLite.promise(this.event)<Args>();
+  promise(timeout = 0) {
+    return this.eventLite.promise(this.event, timeout)<Args>();
   }
 
   connect(eventLite = new EventLite()) {
