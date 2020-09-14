@@ -199,7 +199,7 @@ export class EventHandle<Args extends unknown[], E> {
   }
 
   promise() {
-    return this.eventLite.promise(this.event);
+    return this.eventLite.promise(this.event)<Args>();
   }
 
   connect(eventLite = new EventLite()) {
