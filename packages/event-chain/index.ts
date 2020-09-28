@@ -69,7 +69,7 @@ export class EventLite {
             };
           });
         } else {
-          const watcher = new EventWatcher<Args, E>(this, event, (watcher) => {
+          new EventWatcher<Args, E>(this, event, (watcher) => {
             return (...args) => {
               resolve(args);
               watcher.cancal();
@@ -152,7 +152,7 @@ export class EventLite {
 
     const deal = () => {
       while (resolverPool.length && argsPool.length) {
-        const [resolve, reject] = resolverPool.shift();
+        const [resolve] = resolverPool.shift();
         const args = argsPool.shift();
         resolve({
           args,
