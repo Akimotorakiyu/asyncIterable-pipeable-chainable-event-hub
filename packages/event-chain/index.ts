@@ -2,10 +2,37 @@ export type CallBack<Args extends unknown[], V = void> = (...args: Args) => V;
 
 export type CallBackSet = Set<CallBack<unknown[]>>;
 
+type TimeoutHandler = ReturnType<typeof setTimeout>;
+
 export class EventLite {
   doMap = new Map<unknown, CallBackSet>();
-
+  schedule = new Set<TimeoutHandler>();
   constructor() {}
+
+  addSchedule(fn: () => void, timeout: number) {
+    const h = setTimeout(() => {
+      this.schedule.delete(h);
+      fn();
+    }, timeout);
+
+    this.schedule.add(h);
+    return {
+      eventLite: this,
+      h,
+    };
+  }
+
+  clearSchedule(h?: TimeoutHandler) {
+    if (h) {
+      this.schedule.delete(h);
+      clearTimeout(h);
+    } else {
+      this.schedule.forEach((x) => {
+        clearTimeout(x);
+      });
+      this.schedule.clear();
+    }
+  }
 
   on<Args extends unknown[], E>(
     event: E,
