@@ -5,7 +5,8 @@
     "noUnusedLocals": true,
     "sourceMap": true,
     "strict": true,
-    "noImplicitThis": true
+    "noImplicitThis": true,
+    "allowJs": false
   },
   "files": ["index.ts"]
 }
