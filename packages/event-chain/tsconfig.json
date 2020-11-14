@@ -3,7 +3,9 @@
     "target": "es2020",
     "module": "UMD",
     "noUnusedLocals": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitThis": true
   },
   "files": ["index.ts"]
 }
