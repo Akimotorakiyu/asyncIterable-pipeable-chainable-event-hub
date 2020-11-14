@@ -1,11 +1,11 @@
 export type CallBack<Args extends unknown[], V = void> = (...args: Args) => V;
 
-export type CallBackSet = Set<CallBack<unknown[]>>;
+export type CallBackSet<Args extends unknown[]> = Set<CallBack<Args, void>>;
 
 type TimeoutHandler = ReturnType<typeof setTimeout>;
 
 export class EventLite {
-  doMap = new Map<unknown, CallBackSet>();
+  doMap = new Map<unknown, CallBackSet<unknown[]>>();
   schedule = new Set<TimeoutHandler>();
   constructor() {}
 
@@ -38,19 +38,18 @@ export class EventLite {
     event: E,
     genFn: (eventWatcher: EventWatcher<Args, E>) => CallBack<Args>
   ) {
-    return new EventWatcher(this, event, genFn).start();
+    const watcher = new EventWatcher(this, event, genFn) as EventWatcher<
+      Args,
+      E
+    >;
+    return watcher;
   }
 
   onLite<Args extends unknown[], E>(event: E, fn: CallBack<Args>) {
-    return new EventWatcher(this, event, (eventWatcher) => {
-      return fn;
-    }).start();
+    return new EventWatcher(this, event, () => fn).start();
   }
 
-  remove<Args extends unknown[], E>(
-    event: E | undefined,
-    fn: CallBack<Args> | undefined
-  ) {
+  remove<E>(event: E | undefined, fn: CallBack<unknown[]> | undefined) {
     if (event && fn) {
       const callBackSet = this.doMap.get(event);
       if (callBackSet) {
@@ -179,8 +178,11 @@ export class EventLite {
 
     const deal = () => {
       while (resolverPool.length && argsPool.length) {
-        const [resolve] = resolverPool.shift();
-        const args = argsPool.shift();
+        const [resolve] = resolverPool.shift() as [
+          (myAsyncIterator: MyAsyncIterator) => void,
+          (reason: R) => void
+        ];
+        const args = argsPool.shift() as Args;
         resolve({
           args,
           cancel,
@@ -252,17 +254,20 @@ export class EventWatcher<Args extends unknown[], E> {
 
   start() {
     const doMap = this.eventLite.doMap;
-    let callBackSet: CallBackSet;
-    if (!(callBackSet = doMap.get(this.event))) {
-      doMap.set(this.event, (callBackSet = new Set([])));
+    let callBackSet: CallBackSet<Args>;
+    if (
+      !(callBackSet = (doMap.get(this.event) as unknown) as CallBackSet<Args>)
+    ) {
+      callBackSet = new Set<CallBack<Args>>();
+      doMap.set(this.event, callBackSet as CallBackSet<unknown[]>);
     }
 
     callBackSet.add(this.fn);
-    return this;
+    return this as EventWatcher<Args, E>;
   }
 
   cancal() {
-    this.eventLite.remove(this.event, this.fn);
+    this.eventLite.remove(this.event, this.fn as CallBack<unknown[], void>);
     return this;
   }
 
